@@ -18,7 +18,7 @@ namespace AzurePractices.Function
             dynamic messageDTO = new 
             {
                 fromEmail = "yopez83@hotmail.com",
-                toEmail = "e3105548@miamidade.gov",
+                toEmail = "e310548@miamidade.gov",
                 subject = "Blob Modified",
                 message = $"A blob has been modified.\n Name: {name}\n Size: {myBlob.Length} Bytes.",
                 isImportant = true
