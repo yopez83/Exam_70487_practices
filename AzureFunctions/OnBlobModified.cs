@@ -6,7 +6,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
-namespace AzurePractices.Function
+namespace AzureFunctions
 {
     public static class OnBlobModified
     {

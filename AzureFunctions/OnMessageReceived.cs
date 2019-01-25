@@ -1,11 +1,10 @@
 using System;
 using System.Net.Mail;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace AzurePractices.Function
+namespace AzureFunctions
 {
     public static class OnMessageReceived
     {
