@@ -2,14 +2,27 @@ using System;
 using System.Net.Mail;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 
 namespace AzureFunctions
 {
+    public class NotificationMessage: TableEntity
+    {
+        public string FromEmail { get; set; }
+        public string ToEmail { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public bool IsImportant { get; set; }
+        public DateTime NotifiedAt { get; set; }
+        public string Comments { get; set; }
+    }
+
     public static class OnMessageReceived
     {
         [FunctionName("OnMessageReceived")]
-        public static void Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
+        [return: Table("blobNotifications", Connection = "AzureWebJobsStorage")]
+        public static NotificationMessage Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
         {
             log.LogInformation("New queue message received."); 
 
@@ -35,15 +48,30 @@ namespace AzureFunctions
                 Timeout = 20000
             };
 
+            var notification = new NotificationMessage
+            {
+                PartitionKey = "EmailNotifications",
+                RowKey = Guid.NewGuid().ToString(),
+                FromEmail = data.fromEmail.ToString(),
+                ToEmail = data.toEmail.ToString(),
+                Subject = data.subject.ToString(),
+                Body = data.message.ToString(),
+                IsImportant = bool.Parse(data.isImportant.ToString())
+            };
+
             try 
             {
                 client.Send(mail);
-                log.LogInformation($"Email sent to {data.toEmail}.");
+                notification.NotifiedAt = DateTime.UtcNow;
+                log.LogInformation($"Email sent to {data.toEmail} at {notification.NotifiedAt}.");
             }
             catch (Exception ex) 
             {
-                log.LogError(ex.ToString());
+                notification.Comments = ex.ToString();
+                log.LogError(ex.ToString());                
             }
+
+            return notification;
         }
     }
 }
